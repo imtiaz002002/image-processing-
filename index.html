@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Processor</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    canvas {
+      margin-top: 20px;
+      border: 2px solid black;
+    }
+    button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Image Processing Web App</h1>
+
+<input type="file" id="upload" accept="image/*"><br>
+
+<canvas id="canvas"></canvas><br>
+
+<button onclick="grayscale()">Grayscale</button>
+<button onclick="invert()">Invert</button>
+<button onclick="brightness()">Brightness</button>
+<button onclick="reset()">Reset</button>
+
+<script>
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+let originalImage = null;
+
+document.getElementById("upload").addEventListener("change", function(e) {
+    let file = e.target.files[0];
+    let img = new Image();
+
+    img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        originalImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    img.src = URL.createObjectURL(file);
+});
+
+function grayscale() {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        let avg = (data[i] + data[i+1] + data[i+2]) / 3;
+        data[i] = data[i+1] = data[i+2] = avg;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function invert() {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = 255 - data[i];
+        data[i+1] = 255 - data[i+1];
+        data[i+2] = 255 - data[i+2];
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function brightness() {
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] += 40;
+        data[i+1] += 40;
+        data[i+2] += 40;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+}
+
+function reset() {
+    if (originalImage) {
+        ctx.putImageData(originalImage, 0, 0);
+    }
+}
+</script>
+
+</body>
+</html>
